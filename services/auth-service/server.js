@@ -124,7 +124,7 @@ app.get('/ready', async (req, res) => {
 });
 
 // --- Login, registration and token verification ---
-app.post('/login', async (req, res, next) => {
+app.post('/auth/login', async (req, res, next) => {
   try {
     const { email, password } = req.body || {};
     const account = email ? await store.find(email) : null;
@@ -137,7 +137,7 @@ app.post('/login', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-app.post('/register', async (req, res, next) => {
+app.post('/auth/register', async (req, res, next) => {
   try {
     const { email, password, name } = req.body || {};
     if (!email || !password) return res.status(400).json({ error: 'email and password are required' });
@@ -149,7 +149,7 @@ app.post('/register', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-app.get('/verify', (req, res) => {
+app.get('/auth/verify', (req, res) => {
   const token = (req.headers.authorization || '').replace('Bearer ', '');
   const userId = verifyToken(token);
   if (!userId) return res.status(401).json({ valid: false });

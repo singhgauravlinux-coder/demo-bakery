@@ -232,3 +232,11 @@ A dedicated currency-conversion microservice at `/api/currency` with **47 curren
 The frontend has a currency picker in the header: every price, cart line and total converts live, JPY/KRW-style zero-decimal currencies format correctly, the choice persists across visits, and checkout charges the payment-service in the selected currency. Rates are demo reference rates — swap the table in `services/currency-service/server.js` for a live FX feed in production.
 
 Run everything with `make up`, then open http://localhost:8080 (demo login: `amelie@crumbandember.dev` / `baguette`).
+
+# 🚀 Production Security
+
+> ⚠️ **Testing Only**
+>
+> This implementation is provided **for testing purposes only**.
+>
+> 🔐 In **production**, store all secrets in **Azure Key Vault** (or another secure secrets manager) and **never hardcode credentials** in source code, configuration files, or repositories.

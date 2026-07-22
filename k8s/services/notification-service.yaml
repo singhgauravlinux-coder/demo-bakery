@@ -24,7 +24,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: notification-service
-          image: ghcr.io/singhgauravlinux-coder/demo-bakery/notification-service:9f7b9ab
+          image: ghcr.io/singhgauravlinux-coder/demo-bakery/notification-service:551c1e7
           imagePullPolicy: Always
           ports:
             - containerPort: 3010

@@ -24,7 +24,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: invoice-service
-          image: ghcr.io/singhgauravlinux-coder/demo-bakery/invoice-service:9f7b9ab
+          image: ghcr.io/singhgauravlinux-coder/demo-bakery/invoice-service:551c1e7
           imagePullPolicy: Always
           ports:
             - containerPort: 3021

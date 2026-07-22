@@ -1,4 +1,4 @@
-name: Build and update manifests
+name: Build, Analyse and update manifests
 
 on:
   push:
@@ -14,8 +14,37 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
+  # ------------------------------------------------------------ sonarqube analysis
+  # Runs first, before any images are built or pushed. The Quality Gate check
+  # step is what makes this job actually FAIL when the gate is red — without
+  # it, sonarqube-scan-action only uploads results and always exits 0. Since
+  # the build job (below) needs this job, a red gate blocks the push entirely.
+  sonar-analysis:
+    name: Build and analyze (SonarQube)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: SonarQube Quality Gate check
+        uses: SonarSource/sonarqube-quality-gate-action@cf038b0e0cdecfa9e56c198bbb7d21d751d62c3b # v1.2.0
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   # ------------------------------------------------------------ build images
+  # Gated on sonar-analysis: this whole job (including the push step) will
+  # not start until the Sonar scan + quality gate has passed. If Sonar fails,
+  # GitHub Actions skips this job automatically — no images get pushed.
   build:
+    needs: sonar-analysis
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -87,8 +116,12 @@ jobs:
   # manifest to ghcr.io/<owner>/<repo>/<service>:<short-sha> and commit the
   # change back. The manifests in git therefore always reference the exact
   # image built from that commit — no manual editing of YOUR_GITHUB_USERNAME.
+  #
+  # build already needs sonar-analysis, so this is transitively gated too;
+  # sonar-analysis is listed explicitly for clarity and so this job's status
+  # checks show the dependency directly.
   update-manifests:
-    needs: build
+    needs: [build, sonar-analysis]
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
